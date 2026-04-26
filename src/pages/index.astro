@@ -1,0 +1,134 @@
+---
+const title = "Trail & Frame";
+const tagline = "Hiking guides and landscape photography from New England and beyond.";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{title}</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: Georgia, serif;
+				background: #0f1a0f;
+				color: #e8e0d0;
+				min-height: 100vh;
+			}
+
+			nav {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 1.5rem 3rem;
+				border-bottom: 1px solid #2a3a2a;
+			}
+
+			nav .logo {
+				font-size: 1.25rem;
+				font-weight: bold;
+				letter-spacing: 0.05em;
+				color: #c8b89a;
+			}
+
+			nav ul {
+				list-style: none;
+				display: flex;
+				gap: 2rem;
+			}
+
+			nav a {
+				color: #a0b09a;
+				text-decoration: none;
+				font-family: system-ui, sans-serif;
+				font-size: 0.9rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			nav a:hover {
+				color: #e8e0d0;
+			}
+
+			.hero {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 8rem 2rem;
+				gap: 1.5rem;
+			}
+
+			.hero h1 {
+				font-size: 3.5rem;
+				font-weight: normal;
+				color: #c8b89a;
+				letter-spacing: 0.02em;
+			}
+
+			.hero p {
+				font-size: 1.2rem;
+				color: #a0b09a;
+				max-width: 520px;
+				line-height: 1.7;
+			}
+
+			.hero-links {
+				display: flex;
+				gap: 1.5rem;
+				margin-top: 1rem;
+			}
+
+			.btn {
+				padding: 0.75rem 2rem;
+				border: 1px solid #4a6a4a;
+				color: #c8b89a;
+				text-decoration: none;
+				font-family: system-ui, sans-serif;
+				font-size: 0.85rem;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+				transition: background 0.2s, color 0.2s;
+			}
+
+			.btn:hover {
+				background: #2a3a2a;
+				color: #e8e0d0;
+			}
+
+			.btn-primary {
+				background: #2a4a2a;
+				border-color: #4a8a4a;
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+			<span class="logo">Trail & Frame</span>
+			<ul>
+				<li><a href="/trails">Trails</a></li>
+				<li><a href="/gallery">Gallery</a></li>
+				<li><a href="/about">About</a></li>
+			</ul>
+		</nav>
+
+		<main>
+			<section class="hero">
+				<h1>{title}</h1>
+				<p>{tagline}</p>
+				<div class="hero-links">
+					<a href="/trails" class="btn btn-primary">Browse Trails</a>
+					<a href="/gallery" class="btn">View Gallery</a>
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
