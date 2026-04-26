@@ -187,7 +187,7 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 			{HIKING_LISTS.map(list => (
 				<button class="list-btn" data-list-id={list.id}>
 					{list.name}
-					<span class="badge">{list.peaks.length}/{list.totalPeaks}</span>
+					<span class="badge">{list.peaks.length} peaks</span>
 				</button>
 			))}
 		</div>

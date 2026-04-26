@@ -1,0 +1,49 @@
+---
+const base = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
+
+interface Props {
+  photo: string;
+  caption?: string;
+  alt?: string;
+  wide?: boolean;
+}
+const { photo, caption, alt = caption ?? '', wide = false } = Astro.props;
+const src = `${base}/photos/${photo}.webp`;
+---
+
+<figure class:list={['trail-photo', { 'trail-photo--wide': wide }]}>
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+  />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .trail-photo {
+    margin: 2.5rem -2rem;
+  }
+
+  .trail-photo--wide {
+    margin: 2.5rem -4rem;
+  }
+
+  .trail-photo img {
+    width: 100%;
+    display: block;
+    border-radius: 3px;
+    object-fit: cover;
+  }
+
+  .trail-photo figcaption {
+    font-family: system-ui, sans-serif;
+    font-size: 0.78rem;
+    color: #a0b09a;
+    margin-top: 0.6rem;
+    text-align: center;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+</style>

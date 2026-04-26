@@ -9,10 +9,16 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "photo:add": "node scripts/add-photo.mjs"
   },
   "dependencies": {
+    "@astrojs/mdx": "^5.0.4",
     "astro": "^6.1.9",
     "mapbox-gl": "^3.22.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5",
+    "wrangler": "^4.85.0"
   }
 }

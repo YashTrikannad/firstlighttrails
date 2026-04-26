@@ -20,5 +20,15 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# local photo workflow — originals and processed outputs stay local
+photos-raw/
+photos-processed/
+
+# wrangler local emulator state
+.wrangler/
+
+# Claude Code settings (machine-local)
+.claude/
+
 # jetbrains setting folder
 .idea/
