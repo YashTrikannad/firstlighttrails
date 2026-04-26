@@ -7,7 +7,7 @@ const { active, overlay = false } = Astro.props;
 ---
 
 <nav class:list={[{ 'nav--overlay': overlay }]}>
-  <a href="/" class="logo">Trail & Frame</a>
+  <a href="/" class="logo">First Light Trails</a>
   <ul>
     <li><a href="/trails"  class:list={[{ active: active === 'trails'  }]}>Trails</a></li>
     <li><a href="/gallery" class:list={[{ active: active === 'gallery' }]}>Gallery</a></li>
