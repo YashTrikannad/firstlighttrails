@@ -1,6 +1,7 @@
 ---
-const title = "Trail & Frame";
-const tagline = "Hiking guides and landscape photography from New England and beyond.";
+import { HIKING_LISTS } from '../data/hikingLists';
+const hikingListsJson = JSON.stringify(HIKING_LISTS);
+const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 ---
 
 <html lang="en">
@@ -8,27 +9,32 @@ const tagline = "Hiking guides and landscape photography from New England and be
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
-		<title>{title}</title>
+		<title>Trail & Frame</title>
+		<link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet" />
+		<script is:inline src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
 		<style>
-			* {
-				margin: 0;
-				padding: 0;
-				box-sizing: border-box;
-			}
+			* { margin: 0; padding: 0; box-sizing: border-box; }
 
 			body {
 				font-family: Georgia, serif;
 				background: #0f1a0f;
 				color: #e8e0d0;
-				min-height: 100vh;
+				height: 100vh;
+				overflow: hidden;
 			}
 
+			#map { width: 100%; height: 100vh; }
+
+			/* Nav overlay */
 			nav {
+				position: absolute;
+				top: 0; left: 0; right: 0;
+				z-index: 10;
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
 				padding: 1.5rem 3rem;
-				border-bottom: 1px solid #2a3a2a;
+				background: linear-gradient(to bottom, rgba(15,26,15,0.85) 0%, transparent 100%);
 			}
 
 			nav .logo {
@@ -36,77 +42,131 @@ const tagline = "Hiking guides and landscape photography from New England and be
 				font-weight: bold;
 				letter-spacing: 0.05em;
 				color: #c8b89a;
+				text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 			}
 
-			nav ul {
-				list-style: none;
-				display: flex;
-				gap: 2rem;
-			}
+			nav ul { list-style: none; display: flex; gap: 2rem; }
 
 			nav a {
-				color: #a0b09a;
-				text-decoration: none;
-				font-family: system-ui, sans-serif;
-				font-size: 0.9rem;
-				letter-spacing: 0.08em;
-				text-transform: uppercase;
-			}
-
-			nav a:hover {
 				color: #e8e0d0;
-			}
-
-			.hero {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				text-align: center;
-				padding: 8rem 2rem;
-				gap: 1.5rem;
-			}
-
-			.hero h1 {
-				font-size: 3.5rem;
-				font-weight: normal;
-				color: #c8b89a;
-				letter-spacing: 0.02em;
-			}
-
-			.hero p {
-				font-size: 1.2rem;
-				color: #a0b09a;
-				max-width: 520px;
-				line-height: 1.7;
-			}
-
-			.hero-links {
-				display: flex;
-				gap: 1.5rem;
-				margin-top: 1rem;
-			}
-
-			.btn {
-				padding: 0.75rem 2rem;
-				border: 1px solid #4a6a4a;
-				color: #c8b89a;
 				text-decoration: none;
 				font-family: system-ui, sans-serif;
 				font-size: 0.85rem;
 				letter-spacing: 0.1em;
 				text-transform: uppercase;
-				transition: background 0.2s, color 0.2s;
+				text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+				transition: color 0.2s;
 			}
 
-			.btn:hover {
-				background: #2a3a2a;
+			nav a:hover { color: #c8b89a; }
+
+			/* List selector panel */
+			.list-panel {
+				position: absolute;
+				bottom: 2.5rem;
+				left: 1.5rem;
+				z-index: 10;
+				background: rgba(15, 26, 15, 0.88);
+				border: 1px solid #2a3a2a;
+				border-radius: 4px;
+				padding: 1rem 1.25rem;
+				min-width: 220px;
+				backdrop-filter: blur(6px);
+			}
+
+			.list-panel-header {
+				font-family: system-ui, sans-serif;
+				font-size: 0.7rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: #a0b09a;
+				margin-bottom: 0.75rem;
+			}
+
+			.list-btn {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				width: 100%;
+				background: none;
+				border: 1px solid #2a3a2a;
+				border-radius: 3px;
 				color: #e8e0d0;
+				font-family: system-ui, sans-serif;
+				font-size: 0.82rem;
+				letter-spacing: 0.04em;
+				padding: 0.5rem 0.75rem;
+				cursor: pointer;
+				transition: background 0.15s, border-color 0.15s, color 0.15s;
+				text-align: left;
+				margin-bottom: 0.4rem;
 			}
 
-			.btn-primary {
-				background: #2a4a2a;
-				border-color: #4a8a4a;
+			.list-btn:last-child { margin-bottom: 0; }
+
+			.list-btn:hover {
+				background: #1e2e1e;
+				border-color: #4a6a4a;
+			}
+
+			.list-btn.active {
+				background: #1e3a1e;
+				border-color: #c8b89a;
+				color: #c8b89a;
+			}
+
+			.list-btn .badge {
+				font-size: 0.7rem;
+				background: #2a3a2a;
+				color: #a0b09a;
+				padding: 0.1rem 0.4rem;
+				border-radius: 2px;
+				margin-left: 0.5rem;
+				flex-shrink: 0;
+			}
+
+			.list-btn.active .badge {
+				background: #3a4a2a;
+				color: #c8b89a;
+			}
+
+			/* Mapbox popup dark theme */
+			.mapboxgl-popup-content {
+				background: #1a2a1a !important;
+				border: 1px solid #3a4a3a;
+				border-radius: 4px;
+				padding: 0.75rem 1rem !important;
+				color: #e8e0d0;
+				font-family: Georgia, serif;
+				box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+				min-width: 160px;
+			}
+
+			.mapboxgl-popup-tip { display: none; }
+
+			.mapboxgl-popup-close-button {
+				color: #a0b09a;
+				font-size: 1.1rem;
+				padding: 0.25rem 0.5rem;
+			}
+
+			.peak-popup strong {
+				display: block;
+				color: #c8b89a;
+				font-size: 0.95rem;
+				margin-bottom: 0.25rem;
+			}
+
+			.peak-popup .elev {
+				font-family: system-ui, sans-serif;
+				font-size: 0.78rem;
+				color: #a0b09a;
+				letter-spacing: 0.04em;
+			}
+
+			/* Mapbox attribution */
+			.mapboxgl-ctrl-attrib {
+				background: rgba(15,26,15,0.7) !important;
 			}
 		</style>
 	</head>
@@ -120,15 +180,89 @@ const tagline = "Hiking guides and landscape photography from New England and be
 			</ul>
 		</nav>
 
-		<main>
-			<section class="hero">
-				<h1>{title}</h1>
-				<p>{tagline}</p>
-				<div class="hero-links">
-					<a href="/trails" class="btn btn-primary">Browse Trails</a>
-					<a href="/gallery" class="btn">View Gallery</a>
-				</div>
-			</section>
-		</main>
+		<div id="map"></div>
+
+		<div class="list-panel">
+			<div class="list-panel-header">Explore by List</div>
+			{HIKING_LISTS.map(list => (
+				<button class="list-btn" data-list-id={list.id}>
+					{list.name}
+					<span class="badge">{list.peaks.length}/{list.totalPeaks}</span>
+				</button>
+			))}
+		</div>
+
+		<script define:vars={{ hikingListsJson, mapboxToken }}>
+			mapboxgl.accessToken = mapboxToken;
+
+			const hikingLists = JSON.parse(hikingListsJson);
+
+			const map = new mapboxgl.Map({
+				container: 'map',
+				style: 'mapbox://styles/mapbox/outdoors-v12',
+				center: [-71.5, 44.0],
+				zoom: 7,
+				minZoom: 4,
+			});
+
+			map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+			let activeMarkers = [];
+			let activeListId = null;
+
+			function clearMarkers() {
+				activeMarkers.forEach(m => m.remove());
+				activeMarkers = [];
+			}
+
+			function showList(listId) {
+				const isSameList = listId === activeListId;
+				clearMarkers();
+
+				document.querySelectorAll('.list-btn').forEach(b => b.classList.remove('active'));
+
+				if (isSameList) {
+					activeListId = null;
+					map.flyTo({ center: [-71.5, 44.0], zoom: 7, duration: 1000 });
+					return;
+				}
+
+				activeListId = listId;
+				document.querySelector(`[data-list-id="${listId}"]`)?.classList.add('active');
+
+				const list = hikingLists.find(l => l.id === listId);
+				if (!list) return;
+
+				list.peaks.forEach(peak => {
+					const popup = new mapboxgl.Popup({ offset: 20, closeButton: true })
+						.setHTML(`
+							<div class="peak-popup">
+								<strong>${peak.name}</strong>
+								<span class="elev">${peak.elevation.toLocaleString()} ft</span>
+							</div>
+						`);
+
+					const marker = new mapboxgl.Marker({ color: '#c8b89a', scale: 0.8 })
+						.setLngLat(peak.coords)
+						.setPopup(popup)
+						.addTo(map);
+
+					activeMarkers.push(marker);
+				});
+
+				// Fit map to show all peaks with padding
+				const bounds = list.peaks.reduce((b, peak) => {
+					return b.extend(peak.coords);
+				}, new mapboxgl.LngLatBounds(list.peaks[0].coords, list.peaks[0].coords));
+
+				map.fitBounds(bounds, { padding: 80, maxZoom: 10, duration: 1200 });
+			}
+
+			document.querySelectorAll('.list-btn').forEach(btn => {
+				btn.addEventListener('click', () => {
+					showList(btn.dataset.listId);
+				});
+			});
+		</script>
 	</body>
 </html>
