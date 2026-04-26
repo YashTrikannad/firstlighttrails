@@ -2,6 +2,7 @@ export interface Peak {
   name: string;
   elevation: number; // feet
   coords: [number, number]; // [lng, lat] — Mapbox format
+  trailSlug?: string;  // links to /trails/[slug] if a guide exists
 }
 
 export interface HikingList {
@@ -19,7 +20,7 @@ export const NH_52_WAV: Peak[] = [
   { name: "The Horn",          elevation: 3900, coords: [-71.400120,  44.517955] },
   { name: "Shelburne Moriah",  elevation: 3743, coords: [-71.098342,  44.353239] },
   { name: "Sugarloaf Mt",      elevation: 3702, coords: [-71.467890,  44.744170] },
-  { name: "Imp Face",          elevation: 3615, coords: [-71.188150,  44.321627] },
+  { name: "Imp Face",          elevation: 3615, coords: [-71.188150,  44.321627], trailSlug: 'imp-face' },
   { name: "North Baldface",    elevation: 3597, coords: [-71.086988,  44.242999] },
   { name: "Mt. Success",       elevation: 3592, coords: [-71.039180,  44.471520] },
   { name: "South Baldface",    elevation: 3576, coords: [-71.077810,  44.230870] },

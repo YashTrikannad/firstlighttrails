@@ -2,7 +2,30 @@
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import { HIKING_LISTS } from '../data/hikingLists';
-const hikingListsJson = JSON.stringify(HIKING_LISTS);
+import { getCollection } from 'astro:content';
+
+const trails = await getCollection('trails');
+const photosBase = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
+
+// Build lookup: trailSlug → { summary, coverPhoto }
+const trailInfo = Object.fromEntries(
+  trails.map(t => [t.id, { summary: t.data.summary, coverPhoto: t.data.coverPhoto ?? null }])
+);
+
+// Enrich peaks with trail data so the map script has everything it needs
+const enrichedLists = HIKING_LISTS.map(list => ({
+  ...list,
+  peaks: list.peaks.map(peak => ({
+    ...peak,
+    trail: peak.trailSlug ? {
+      slug: peak.trailSlug,
+      summary: trailInfo[peak.trailSlug]?.summary ?? null,
+      coverPhoto: trailInfo[peak.trailSlug]?.coverPhoto ?? null,
+    } : null,
+  })),
+}));
+
+const hikingListsJson = JSON.stringify(enrichedLists);
 const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 ---
 
@@ -83,16 +106,18 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         color: var(--accent-soft);
       }
 
-      /* Mapbox popup */
+      /* Mapbox popup base */
       .mapboxgl-popup-content {
         background: var(--popup-bg) !important;
         border: 1px solid var(--popup-border);
-        border-radius: 4px;
-        padding: 0.75rem 1rem !important;
+        border-radius: 6px;
+        padding: 0 !important;
         color: var(--text);
         font-family: Georgia, serif;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        min-width: 160px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        overflow: hidden;
+        min-width: 220px;
+        max-width: 260px;
       }
 
       .mapboxgl-popup-tip { display: none; }
@@ -100,7 +125,15 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
       .mapboxgl-popup-close-button {
         color: var(--text-muted);
         font-size: 1.1rem;
-        padding: 0.25rem 0.5rem;
+        padding: 0.3rem 0.5rem;
+        z-index: 1;
+        background: var(--popup-bg);
+        border-radius: 0 6px 0 4px;
+      }
+
+      /* Simple popup (no trail guide) */
+      .peak-popup {
+        padding: 0.75rem 1rem;
       }
 
       .peak-popup strong {
@@ -115,6 +148,71 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         font-size: 0.78rem;
         color: var(--text-muted);
         letter-spacing: 0.04em;
+      }
+
+      /* Rich popup (has trail guide) */
+      .peak-popup--trail .popup-img {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .peak-popup--trail .popup-img-placeholder {
+        width: 100%;
+        height: 130px;
+        background: var(--bg-elevated);
+      }
+
+      .peak-popup--trail .popup-body {
+        padding: 0.75rem 1rem 0.9rem;
+      }
+
+      .peak-popup--trail strong {
+        display: block;
+        font-size: 0.95rem;
+        color: var(--accent);
+        margin-bottom: 0.2rem;
+      }
+
+      .peak-popup--trail .elev {
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        letter-spacing: 0.04em;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .peak-popup--trail .popup-summary {
+        font-family: system-ui, sans-serif;
+        font-size: 0.78rem;
+        color: var(--text-subtle);
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .peak-popup--trail .popup-link {
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        text-decoration: none;
+        border: 1px solid var(--accent);
+        padding: 0.3rem 0.7rem;
+        border-radius: 3px;
+        display: inline-block;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .peak-popup--trail .popup-link:hover {
+        background: var(--accent);
+        color: var(--bg);
       }
 
       .mapboxgl-ctrl-attrib {
@@ -136,7 +234,7 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
     ))}
   </div>
 
-  <script define:vars={{ hikingListsJson, mapboxToken }}>
+  <script define:vars={{ hikingListsJson, mapboxToken, photosBase }}>
     mapboxgl.accessToken = mapboxToken;
     const hikingLists = JSON.parse(hikingListsJson);
 
@@ -162,6 +260,33 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? '#c8b89a' : '#7a5018';
     }
 
+    function buildPopupHTML(peak) {
+      if (peak.trail) {
+        const imgHTML = peak.trail.coverPhoto
+          ? `<img class="popup-img" src="${photosBase}/photos/${peak.trail.coverPhoto}.webp" alt="${peak.name}" loading="lazy" />`
+          : `<div class="popup-img-placeholder"></div>`;
+        const summaryHTML = peak.trail.summary
+          ? `<span class="popup-summary">${peak.trail.summary}</span>`
+          : '';
+        return `
+          <div class="peak-popup peak-popup--trail">
+            ${imgHTML}
+            <div class="popup-body">
+              <strong>${peak.name}</strong>
+              <span class="elev">${peak.elevation.toLocaleString()} ft</span>
+              ${summaryHTML}
+              <a class="popup-link" href="/trails/${peak.trail.slug}">Trail Guide →</a>
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div class="peak-popup">
+          <strong>${peak.name}</strong>
+          <span class="elev">${peak.elevation.toLocaleString()} ft</span>
+        </div>`;
+    }
+
     function showList(listId) {
       const isSameList = listId === activeListId;
       clearMarkers();
@@ -180,13 +305,8 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
       if (!list) return;
 
       list.peaks.forEach(peak => {
-        const popup = new mapboxgl.Popup({ offset: 20, closeButton: true })
-          .setHTML(`
-            <div class="peak-popup">
-              <strong>${peak.name}</strong>
-              <span class="elev">${peak.elevation.toLocaleString()} ft</span>
-            </div>
-          `);
+        const popup = new mapboxgl.Popup({ offset: 20, closeButton: true, maxWidth: '260px' })
+          .setHTML(buildPopupHTML(peak));
 
         const marker = new mapboxgl.Marker({ color: markerColor(), scale: 0.8 })
           .setLngLat(peak.coords)
