@@ -31,6 +31,7 @@ const { active, overlay = false } = Astro.props;
     top: 0; left: 0; right: 0;
     border-bottom: none;
     background: var(--nav-gradient);
+    padding-left: 0;
   }
 
   .logo {
@@ -44,6 +45,8 @@ const { active, overlay = false } = Astro.props;
   nav.nav--overlay .logo {
     color: #c8b89a;
     text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    width: 240px;
+    text-align: center;
   }
 
   ul { list-style: none; display: flex; gap: 2rem; }
