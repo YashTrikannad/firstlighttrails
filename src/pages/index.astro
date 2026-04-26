@@ -116,7 +116,7 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         font-family: Georgia, serif;
         box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         overflow: hidden;
-        width: 200px;
+        width: 210px;
       }
 
       .mapboxgl-popup-tip { display: none; }
@@ -147,46 +147,55 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         letter-spacing: 0.04em;
       }
 
-      /* Rich popup */
+      /* Rich popup — horizontal thumbnail layout */
+      .peak-popup--trail {
+        display: flex;
+        align-items: stretch;
+      }
+
       .peak-popup--trail .popup-img {
-        width: 100%;
-        height: 90px;
+        width: 56px;
+        min-height: 56px;
+        flex-shrink: 0;
         object-fit: cover;
         display: block;
       }
 
       .peak-popup--trail .popup-img-placeholder {
-        width: 100%;
-        height: 90px;
+        width: 56px;
         background: var(--bg-elevated);
+        flex-shrink: 0;
       }
 
       .peak-popup--trail .popup-body {
-        padding: 0.55rem 0.75rem 0.65rem;
+        padding: 0.45rem 0.6rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.15rem;
+        min-width: 0;
       }
 
       .peak-popup--trail strong {
-        display: block;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
         color: var(--accent);
-        margin-bottom: 0.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .peak-popup--trail .elev {
         font-family: system-ui, sans-serif;
-        font-size: 0.7rem;
+        font-size: 0.67rem;
         color: var(--text-muted);
-        letter-spacing: 0.04em;
-        display: block;
-        margin-bottom: 0.35rem;
+        letter-spacing: 0.03em;
       }
 
       .peak-popup--trail .popup-summary {
         font-family: system-ui, sans-serif;
-        font-size: 0.74rem;
+        font-size: 0.67rem;
         color: var(--text-subtle);
-        line-height: 1.4;
-        margin-bottom: 0.45rem;
+        line-height: 1.3;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -194,11 +203,12 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
 
       .peak-popup--trail .popup-link {
         font-family: system-ui, sans-serif;
-        font-size: 0.68rem;
-        letter-spacing: 0.06em;
+        font-size: 0.63rem;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
         color: var(--accent);
         text-decoration: none;
+        margin-top: 0.1rem;
       }
 
       .peak-popup--trail .popup-link:hover {
