@@ -106,7 +106,7 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         color: var(--accent-soft);
       }
 
-      /* Mapbox popup base */
+      /* Mapbox popup */
       .mapboxgl-popup-content {
         background: var(--popup-bg) !important;
         border: 1px solid var(--popup-border);
@@ -114,105 +114,95 @@ const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
         padding: 0 !important;
         color: var(--text);
         font-family: Georgia, serif;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         overflow: hidden;
-        min-width: 220px;
-        max-width: 260px;
+        width: 200px;
       }
 
       .mapboxgl-popup-tip { display: none; }
 
       .mapboxgl-popup-close-button {
         color: var(--text-muted);
-        font-size: 1.1rem;
-        padding: 0.3rem 0.5rem;
-        z-index: 1;
-        background: var(--popup-bg);
-        border-radius: 0 6px 0 4px;
+        font-size: 1rem;
+        line-height: 1;
+        padding: 0.25rem 0.4rem;
       }
 
-      /* Simple popup (no trail guide) */
+      /* Simple popup */
       .peak-popup {
-        padding: 0.75rem 1rem;
+        padding: 0.6rem 0.8rem;
       }
 
       .peak-popup strong {
         display: block;
         color: var(--accent);
-        font-size: 0.95rem;
-        margin-bottom: 0.25rem;
+        font-size: 0.88rem;
+        margin-bottom: 0.15rem;
       }
 
       .peak-popup .elev {
         font-family: system-ui, sans-serif;
-        font-size: 0.78rem;
+        font-size: 0.72rem;
         color: var(--text-muted);
         letter-spacing: 0.04em;
       }
 
-      /* Rich popup (has trail guide) */
+      /* Rich popup */
       .peak-popup--trail .popup-img {
         width: 100%;
-        height: 130px;
+        height: 90px;
         object-fit: cover;
         display: block;
       }
 
       .peak-popup--trail .popup-img-placeholder {
         width: 100%;
-        height: 130px;
+        height: 90px;
         background: var(--bg-elevated);
       }
 
       .peak-popup--trail .popup-body {
-        padding: 0.75rem 1rem 0.9rem;
+        padding: 0.55rem 0.75rem 0.65rem;
       }
 
       .peak-popup--trail strong {
         display: block;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         color: var(--accent);
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
       }
 
       .peak-popup--trail .elev {
         font-family: system-ui, sans-serif;
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         color: var(--text-muted);
         letter-spacing: 0.04em;
-        margin-bottom: 0.5rem;
         display: block;
+        margin-bottom: 0.35rem;
       }
 
       .peak-popup--trail .popup-summary {
         font-family: system-ui, sans-serif;
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         color: var(--text-subtle);
-        line-height: 1.5;
-        margin-bottom: 0.75rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
+        line-height: 1.4;
+        margin-bottom: 0.45rem;
+        white-space: nowrap;
         overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .peak-popup--trail .popup-link {
         font-family: system-ui, sans-serif;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--accent);
         text-decoration: none;
-        border: 1px solid var(--accent);
-        padding: 0.3rem 0.7rem;
-        border-radius: 3px;
-        display: inline-block;
-        transition: background 0.15s, color 0.15s;
       }
 
       .peak-popup--trail .popup-link:hover {
-        background: var(--accent);
-        color: var(--bg);
+        text-decoration: underline;
       }
 
       .mapboxgl-ctrl-attrib {
