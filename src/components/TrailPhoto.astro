@@ -23,18 +23,29 @@ const src = `${base}/photos/${photo}.webp`;
 
 <style>
   .trail-photo {
-    margin: 2.5rem -2rem;
+    margin: 3rem 0;
   }
 
+  /* full viewport bleed for panoramas */
   .trail-photo--wide {
-    margin: 2.5rem -4rem;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 3rem 0;
   }
 
   .trail-photo img {
     width: 100%;
     display: block;
     border-radius: 3px;
+    max-height: 75vh;
     object-fit: cover;
+  }
+
+  .trail-photo--wide img {
+    border-radius: 0;
+    max-height: 60vh;
   }
 
   .trail-photo figcaption {

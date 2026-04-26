@@ -1,0 +1,70 @@
+---
+interface Props {
+  active?: 'trails' | 'gallery' | 'about';
+  overlay?: boolean; // float over content (home page map)
+}
+const { active, overlay = false } = Astro.props;
+---
+
+<nav class:list={[{ 'nav--overlay': overlay }]}>
+  <a href="/" class="logo">Trail & Frame</a>
+  <ul>
+    <li><a href="/trails"  class:list={[{ active: active === 'trails'  }]}>Trails</a></li>
+    <li><a href="/gallery" class:list={[{ active: active === 'gallery' }]}>Gallery</a></li>
+    <li><a href="/about"   class:list={[{ active: active === 'about'   }]}>About</a></li>
+  </ul>
+</nav>
+
+<style>
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  nav.nav--overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    border-bottom: none;
+    background: var(--nav-gradient);
+  }
+
+  .logo {
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  nav.nav--overlay .logo {
+    color: #c8b89a;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  }
+
+  ul { list-style: none; display: flex; gap: 2rem; }
+
+  a {
+    color: var(--text);
+    text-decoration: none;
+    font-family: system-ui, sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  a:hover, a.active { color: var(--accent); }
+
+  nav.nav--overlay a {
+    color: #e8e0d0;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+
+  nav.nav--overlay a:hover,
+  nav.nav--overlay a.active { color: #c8b89a; }
+</style>

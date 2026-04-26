@@ -1,4 +1,6 @@
 ---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -14,79 +16,26 @@ const { Content } = await render(trail);
 
 const photosBase = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
 
-const difficultyColor: Record<string, string> = {
-  easy:      '#5a8a5a',
-  moderate:  '#a0b09a',
-  hard:      '#c8b89a',
-  strenuous: '#c87a5a',
-};
-
 const routeTypeLabel: Record<string, string> = {
-  'loop':            'Loop',
-  'out-and-back':    'Out & Back',
-  'point-to-point':  'Point to Point',
+  'loop':           'Loop',
+  'out-and-back':   'Out & Back',
+  'point-to-point': 'Point to Point',
 };
 
 function stars(n: number) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
-
-const color = difficultyColor[trail.data.difficulty];
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>{trail.data.title} — Trail & Frame</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<Base title={`${trail.data.title} — Trail & Frame`}>
+  <Fragment slot="head">
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-
-      body {
-        font-family: Georgia, serif;
-        background: #0f1a0f;
-        color: #e8e0d0;
-        min-height: 100vh;
-      }
-
-      /* ── Nav ── */
-      nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.5rem 3rem;
-        border-bottom: 1px solid #1e2e1e;
-      }
-
-      nav .logo {
-        font-size: 1.1rem;
-        font-weight: bold;
-        letter-spacing: 0.05em;
-        color: #c8b89a;
-        text-decoration: none;
-      }
-
-      nav ul { list-style: none; display: flex; gap: 2rem; }
-
-      nav a {
-        color: #e8e0d0;
-        text-decoration: none;
-        font-family: system-ui, sans-serif;
-        font-size: 0.82rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        transition: color 0.2s;
-      }
-
-      nav a:hover { color: #c8b89a; }
-
       /* ── Hero ── */
       .hero {
         position: relative;
         height: 56vh;
         min-height: 360px;
-        background: #141f14;
+        background: var(--bg-elevated);
         overflow: hidden;
       }
 
@@ -94,19 +43,13 @@ const color = difficultyColor[trail.data.difficulty];
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.55;
-      }
-
-      .hero-no-photo {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(160deg, #141f14 0%, #0f1a0f 100%);
+        opacity: 0.75;
       }
 
       .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(15,26,15,0.9) 0%, transparent 60%);
+        background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.05) 60%);
       }
 
       .hero-content {
@@ -122,7 +65,7 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.75rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: #a0b09a;
+        color: rgba(255,255,255,0.65);
         margin-bottom: 0.5rem;
       }
 
@@ -130,14 +73,14 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: clamp(2rem, 5vw, 3.25rem);
         font-weight: normal;
         letter-spacing: 0.02em;
-        color: #e8e0d0;
+        color: #ffffff;
         line-height: 1.1;
         margin-bottom: 0.75rem;
       }
 
       .hero-summary {
         font-size: 1rem;
-        color: #b8b0a0;
+        color: rgba(255,255,255,0.80);
         max-width: 60ch;
         line-height: 1.6;
       }
@@ -145,8 +88,7 @@ const color = difficultyColor[trail.data.difficulty];
       /* ── Stats bar ── */
       .stats-bar {
         display: flex;
-        gap: 0;
-        border-bottom: 1px solid #1e2e1e;
+        border-bottom: 1px solid var(--border);
         overflow-x: auto;
       }
 
@@ -155,7 +97,7 @@ const color = difficultyColor[trail.data.difficulty];
         flex-direction: column;
         gap: 0.2rem;
         padding: 1.25rem 2rem;
-        border-right: 1px solid #1e2e1e;
+        border-right: 1px solid var(--border);
         flex-shrink: 0;
       }
 
@@ -164,26 +106,22 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.65rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: #6a8a6a;
+        color: var(--label);
       }
 
       .stat-value {
         font-family: system-ui, sans-serif;
         font-size: 0.95rem;
-        color: #e8e0d0;
         letter-spacing: 0.04em;
       }
 
-      .stat-value.difficulty {
-        text-transform: capitalize;
-      }
-
-      .stat-value.scenic { color: #c8b89a; letter-spacing: 0.08em; }
+      .stat-value.difficulty { text-transform: capitalize; }
+      .stat-value.scenic { color: var(--accent); letter-spacing: 0.08em; }
 
       /* ── Routes ── */
       .routes-section {
         padding: 2.5rem 3rem;
-        border-bottom: 1px solid #1e2e1e;
+        border-bottom: 1px solid var(--border);
       }
 
       .section-heading {
@@ -191,7 +129,7 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.7rem;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: #6a8a6a;
+        color: var(--label);
         margin-bottom: 1.25rem;
       }
 
@@ -202,15 +140,15 @@ const color = difficultyColor[trail.data.difficulty];
       }
 
       .route-card {
-        background: #141f14;
-        border: 1px solid #2a3a2a;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
         border-radius: 4px;
         padding: 1.25rem 1.5rem;
       }
 
       .route-name {
         font-size: 0.95rem;
-        color: #c8b89a;
+        color: var(--accent);
         margin-bottom: 0.75rem;
         letter-spacing: 0.02em;
       }
@@ -231,12 +169,11 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.62rem;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: #6a8a6a;
+        color: var(--label);
       }
 
       .route-stat-value {
         font-size: 0.95rem;
-        color: #e8e0d0;
         letter-spacing: 0.04em;
       }
 
@@ -247,16 +184,16 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.68rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #a0b09a;
-        background: #1e2e1e;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
         padding: 0.2rem 0.5rem;
         border-radius: 2px;
       }
 
-      /* ── Best season ── */
+      /* ── Season ── */
       .season-section {
         padding: 1.5rem 3rem;
-        border-bottom: 1px solid #1e2e1e;
+        border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
         gap: 1.25rem;
@@ -267,21 +204,17 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.65rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: #6a8a6a;
+        color: var(--label);
         flex-shrink: 0;
       }
 
-      .season-tags {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-      }
+      .season-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
       .season-tag {
         font-size: 0.75rem;
-        color: #a0b09a;
-        background: #1a2a1a;
-        border: 1px solid #2a3a2a;
+        color: var(--text-muted);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
         padding: 0.2rem 0.65rem;
         border-radius: 2px;
         letter-spacing: 0.04em;
@@ -289,40 +222,39 @@ const color = difficultyColor[trail.data.difficulty];
 
       /* ── Prose body ── */
       .trail-body {
-        max-width: 72ch;
+        max-width: 1100px;
         margin: 0 auto;
         padding: 3rem 2rem 5rem;
         font-size: 1.05rem;
         line-height: 1.85;
-        color: #d8d0c0;
+        color: var(--text-body);
+      }
+
+      .trail-body :global(p),
+      .trail-body :global(h2) {
+        max-width: 65ch;
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .trail-body :global(h2) {
         font-size: 1.2rem;
         font-weight: normal;
-        color: #c8b89a;
+        color: var(--accent);
         letter-spacing: 0.04em;
-        margin: 2.5rem 0 1rem;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
         padding-bottom: 0.4rem;
-        border-bottom: 1px solid #2a3a2a;
+        border-bottom: 1px solid var(--border);
       }
 
-      .trail-body :global(p) {
-        margin-bottom: 1.25rem;
-      }
-
+      .trail-body :global(p) { margin-bottom: 1.25rem; }
       .trail-body :global(p:last-child) { margin-bottom: 0; }
-
-      /* TrailPhoto component styles are scoped inside the component */
-      /* but we need to allow the bleed effect from inside prose */
-      .trail-body {
-        overflow-x: hidden;
-      }
 
       /* ── Back link ── */
       .back-link {
-        padding: 0 3rem 3rem;
-        max-width: calc(72ch + 4rem);
+        padding: 0 2rem 3rem;
+        max-width: 1100px;
         margin: 0 auto;
       }
 
@@ -331,117 +263,106 @@ const color = difficultyColor[trail.data.difficulty];
         font-size: 0.8rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #6a8a6a;
+        color: var(--label);
         text-decoration: none;
         transition: color 0.2s;
       }
 
-      .back-link a:hover { color: #c8b89a; }
+      .back-link a:hover { color: var(--accent); }
     </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="logo">Trail & Frame</a>
-      <ul>
-        <li><a href="/trails">Trails</a></li>
-        <li><a href="/gallery">Gallery</a></li>
-        <li><a href="/about">About</a></li>
-      </ul>
-    </nav>
+  </Fragment>
 
-    <!-- Hero -->
-    <div class="hero">
-      {trail.data.coverPhoto
-        ? <img
-            src={`${photosBase}/photos/${trail.data.coverPhoto}.webp`}
-            alt={trail.data.coverImageAlt ?? trail.data.title}
-          />
-        : <div class="hero-no-photo"></div>
-      }
-      <div class="hero-overlay"></div>
-      <div class="hero-content">
-        <div class="hero-location">{trail.data.location}</div>
-        <h1 class="hero-title">{trail.data.title}</h1>
-        <p class="hero-summary">{trail.data.summary}</p>
-      </div>
+  <Nav active="trails" />
+
+  <div class="hero">
+    {trail.data.coverPhoto
+      ? <img
+          src={`${photosBase}/photos/${trail.data.coverPhoto}.webp`}
+          alt={trail.data.coverImageAlt ?? trail.data.title}
+        />
+      : null
+    }
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-location">{trail.data.location}</div>
+      <h1 class="hero-title">{trail.data.title}</h1>
+      <p class="hero-summary">{trail.data.summary}</p>
     </div>
+  </div>
 
-    <!-- Stats bar -->
-    <div class="stats-bar">
-      <div class="stat">
-        <span class="stat-label">Difficulty</span>
-        <span class="stat-value difficulty" style={`color: ${color}`}>{trail.data.difficulty}</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Scenic</span>
-        <span class="stat-value scenic">{stars(trail.data.scenicRating)}</span>
-      </div>
-      {trail.data.routes[0] && (
-        <div class="stat">
-          <span class="stat-label">Distance</span>
-          <span class="stat-value">{trail.data.routes[0].distance} mi</span>
-        </div>
-      )}
-      {trail.data.routes[0] && (
-        <div class="stat">
-          <span class="stat-label">Elevation Gain</span>
-          <span class="stat-value">+{trail.data.routes[0].elevationGain.toLocaleString()} ft</span>
-        </div>
-      )}
-      {trail.data.hikingLists && trail.data.hikingLists.length > 0 && (
-        <div class="stat">
-          <span class="stat-label">Lists</span>
-          <span class="stat-value" style="font-size: 0.8rem; color: #a0b09a;">
-            {trail.data.hikingLists.join(', ')}
-          </span>
-        </div>
-      )}
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-label">Difficulty</span>
+      <span class="stat-value difficulty" style={`color: var(--difficulty-${trail.data.difficulty})`}>
+        {trail.data.difficulty}
+      </span>
     </div>
+    <div class="stat">
+      <span class="stat-label">Scenic</span>
+      <span class="stat-value scenic">{stars(trail.data.scenicRating)}</span>
+    </div>
+    {trail.data.routes[0] && (
+      <div class="stat">
+        <span class="stat-label">Distance</span>
+        <span class="stat-value">{trail.data.routes[0].distance} mi</span>
+      </div>
+    )}
+    {trail.data.routes[0] && (
+      <div class="stat">
+        <span class="stat-label">Elevation Gain</span>
+        <span class="stat-value">+{trail.data.routes[0].elevationGain.toLocaleString()} ft</span>
+      </div>
+    )}
+    {trail.data.hikingLists && trail.data.hikingLists.length > 0 && (
+      <div class="stat">
+        <span class="stat-label">Lists</span>
+        <span class="stat-value" style="font-size:0.8rem; color: var(--text-muted);">
+          {trail.data.hikingLists.join(', ')}
+        </span>
+      </div>
+    )}
+  </div>
 
-    <!-- Routes -->
-    {trail.data.routes.length > 0 && (
-      <div class="routes-section">
-        <div class="section-heading">Route Options</div>
-        <div class="routes-grid">
-          {trail.data.routes.map(route => (
-            <div class="route-card">
-              <div class="route-name">{route.name}</div>
-              <div class="route-stats">
-                <div class="route-stat">
-                  <span class="route-stat-label">Distance</span>
-                  <span class="route-stat-value">{route.distance} mi</span>
-                </div>
-                <div class="route-stat">
-                  <span class="route-stat-label">Gain</span>
-                  <span class="route-stat-value">+{route.elevationGain.toLocaleString()} ft</span>
-                </div>
+  {trail.data.routes.length > 0 && (
+    <div class="routes-section">
+      <div class="section-heading">Route Options</div>
+      <div class="routes-grid">
+        {trail.data.routes.map(route => (
+          <div class="route-card">
+            <div class="route-name">{route.name}</div>
+            <div class="route-stats">
+              <div class="route-stat">
+                <span class="route-stat-label">Distance</span>
+                <span class="route-stat-value">{route.distance} mi</span>
               </div>
-              <span class="route-type-badge">{routeTypeLabel[route.type]}</span>
+              <div class="route-stat">
+                <span class="route-stat-label">Gain</span>
+                <span class="route-stat-value">+{route.elevationGain.toLocaleString()} ft</span>
+              </div>
             </div>
-          ))}
-        </div>
+            <span class="route-type-badge">{routeTypeLabel[route.type]}</span>
+          </div>
+        ))}
       </div>
-    )}
+    </div>
+  )}
 
-    <!-- Best season -->
-    {trail.data.bestSeason.length > 0 && (
-      <div class="season-section">
-        <span class="season-label">Best Season</span>
-        <div class="season-tags">
-          {trail.data.bestSeason.map(s => (
-            <span class="season-tag">{s}</span>
-          ))}
-        </div>
+  {trail.data.bestSeason.length > 0 && (
+    <div class="season-section">
+      <span class="season-label">Best Season</span>
+      <div class="season-tags">
+        {trail.data.bestSeason.map(s => (
+          <span class="season-tag">{s}</span>
+        ))}
       </div>
-    )}
-
-    <!-- Trail description body (MDX) -->
-    <div class="trail-body">
-      <Content />
     </div>
+  )}
 
-    <div class="back-link">
-      <a href="/trails">← All Trails</a>
-    </div>
-  </body>
-</html>
+  <div class="trail-body">
+    <Content />
+  </div>
+
+  <div class="back-link">
+    <a href="/trails">← All Trails</a>
+  </div>
+</Base>

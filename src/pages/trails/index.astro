@@ -1,77 +1,27 @@
 ---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
 import { getCollection } from 'astro:content';
 
 const trails = await getCollection('trails');
 const photosBase = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
-
-const difficultyOrder = { easy: 0, moderate: 1, hard: 2, strenuous: 3 };
-const difficultyColor: Record<string, string> = {
-  easy:      '#5a8a5a',
-  moderate:  '#a0b09a',
-  hard:      '#c8b89a',
-  strenuous: '#c87a5a',
-};
 
 function stars(n: number) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Trail Guides — Trail & Frame</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<Base title="Trail Guides — Trail & Frame">
+  <Fragment slot="head">
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-
-      body {
-        font-family: Georgia, serif;
-        background: #0f1a0f;
-        color: #e8e0d0;
-        min-height: 100vh;
-      }
-
-      nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.5rem 3rem;
-        border-bottom: 1px solid #1e2e1e;
-      }
-
-      nav .logo {
-        font-size: 1.1rem;
-        font-weight: bold;
-        letter-spacing: 0.05em;
-        color: #c8b89a;
-        text-decoration: none;
-      }
-
-      nav ul { list-style: none; display: flex; gap: 2rem; }
-
-      nav a {
-        color: #e8e0d0;
-        text-decoration: none;
-        font-family: system-ui, sans-serif;
-        font-size: 0.82rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        transition: color 0.2s;
-      }
-
-      nav a:hover, nav a.active { color: #c8b89a; }
-
       .page-header {
         padding: 4rem 3rem 2.5rem;
-        border-bottom: 1px solid #1e2e1e;
+        border-bottom: 1px solid var(--border);
       }
 
       .page-header h1 {
         font-size: 2rem;
         font-weight: normal;
-        color: #e8e0d0;
         letter-spacing: 0.02em;
         margin-bottom: 0.5rem;
       }
@@ -79,7 +29,7 @@ function stars(n: number) {
       .page-header p {
         font-family: system-ui, sans-serif;
         font-size: 0.85rem;
-        color: #a0b09a;
+        color: var(--text-muted);
         letter-spacing: 0.04em;
       }
 
@@ -92,8 +42,8 @@ function stars(n: number) {
       }
 
       .trail-card {
-        background: #141f14;
-        border: 1px solid #2a3a2a;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
         border-radius: 4px;
         overflow: hidden;
         text-decoration: none;
@@ -104,34 +54,33 @@ function stars(n: number) {
       }
 
       .trail-card:hover {
-        border-color: #4a6a4a;
+        border-color: var(--border-hover);
         transform: translateY(-2px);
       }
 
       .trail-card-img {
         height: 200px;
-        background: #1a2a1a;
+        background: var(--bg-elevated);
         overflow: hidden;
-        position: relative;
       }
 
       .trail-card-img img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        opacity: 0.85;
+        opacity: 0.9;
         transition: opacity 0.2s;
       }
 
       .trail-card:hover .trail-card-img img { opacity: 1; }
 
-      .trail-card-img .no-photo {
+      .no-photo {
         width: 100%;
         height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #2a3a2a;
+        color: var(--border-hover);
         font-family: system-ui, sans-serif;
         font-size: 0.75rem;
         letter-spacing: 0.08em;
@@ -146,24 +95,23 @@ function stars(n: number) {
         flex: 1;
       }
 
+      .trail-card-location {
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
       .trail-card-title {
         font-size: 1.1rem;
         font-weight: normal;
-        color: #e8e0d0;
         letter-spacing: 0.02em;
-      }
-
-      .trail-card-location {
-        font-family: system-ui, sans-serif;
-        font-size: 0.75rem;
-        color: #a0b09a;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
       }
 
       .trail-card-summary {
         font-size: 0.88rem;
-        color: #b8b0a0;
+        color: var(--text-subtle);
         line-height: 1.6;
         flex: 1;
       }
@@ -174,7 +122,7 @@ function stars(n: number) {
         gap: 0.75rem;
         flex-wrap: wrap;
         padding-top: 0.75rem;
-        border-top: 1px solid #1e2e1e;
+        border-top: 1px solid var(--border);
         font-family: system-ui, sans-serif;
         font-size: 0.75rem;
       }
@@ -182,24 +130,22 @@ function stars(n: number) {
       .badge-difficulty {
         padding: 0.2rem 0.6rem;
         border-radius: 2px;
-        border: 1px solid;
+        border: 1px solid currentColor;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         font-size: 0.68rem;
+        opacity: 0.85;
       }
 
       .trail-meta-stat {
-        color: #a0b09a;
+        color: var(--text-muted);
         letter-spacing: 0.04em;
       }
 
-      .trail-meta-stat span {
-        color: #c8b89a;
-        margin-right: 0.2rem;
-      }
+      .trail-meta-stat span { color: var(--text); margin-right: 0.2rem; }
 
       .scenic-stars {
-        color: #c8b89a;
+        color: var(--accent);
         letter-spacing: 0.05em;
         font-size: 0.75rem;
         margin-left: auto;
@@ -207,76 +153,64 @@ function stars(n: number) {
 
       .empty-state {
         padding: 4rem 3rem;
-        color: #a0b09a;
+        color: var(--text-muted);
         font-family: system-ui, sans-serif;
         font-size: 0.9rem;
       }
     </style>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="logo">Trail & Frame</a>
-      <ul>
-        <li><a href="/trails" class="active">Trails</a></li>
-        <li><a href="/gallery">Gallery</a></li>
-        <li><a href="/about">About</a></li>
-      </ul>
-    </nav>
+  </Fragment>
 
-    <div class="page-header">
-      <h1>Trail Guides</h1>
-      <p>{trails.length} {trails.length === 1 ? 'guide' : 'guides'} — New England & beyond</p>
+  <Nav active="trails" />
+
+  <div class="page-header">
+    <h1>Trail Guides</h1>
+    <p>{trails.length} {trails.length === 1 ? 'guide' : 'guides'} — New England & beyond</p>
+  </div>
+
+  {trails.length === 0 ? (
+    <div class="empty-state">No trail guides yet — check back soon.</div>
+  ) : (
+    <div class="trail-grid">
+      {trails.map(trail => {
+        const mainRoute = trail.data.routes[0];
+        const diff = trail.data.difficulty;
+        return (
+          <a href={`/trails/${trail.id}`} class="trail-card">
+            <div class="trail-card-img">
+              {trail.data.coverPhoto
+                ? <img
+                    src={`${photosBase}/photos/${trail.data.coverPhoto}.webp`}
+                    alt={trail.data.coverImageAlt ?? trail.data.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                : <div class="no-photo">No photo yet</div>
+              }
+            </div>
+            <div class="trail-card-body">
+              <div>
+                <div class="trail-card-location">{trail.data.location}</div>
+                <div class="trail-card-title">{trail.data.title}</div>
+              </div>
+              <div class="trail-card-summary">{trail.data.summary}</div>
+              <div class="trail-card-meta">
+                <span class="badge-difficulty" style={`color: var(--difficulty-${diff})`}>
+                  {diff}
+                </span>
+                {mainRoute && (
+                  <span class="trail-meta-stat"><span>{mainRoute.distance}</span>mi</span>
+                )}
+                {mainRoute && (
+                  <span class="trail-meta-stat"><span>+{mainRoute.elevationGain.toLocaleString()}</span>ft</span>
+                )}
+                <span class="scenic-stars" title={`Scenic: ${trail.data.scenicRating}/5`}>
+                  {stars(trail.data.scenicRating)}
+                </span>
+              </div>
+            </div>
+          </a>
+        );
+      })}
     </div>
-
-    {trails.length === 0 ? (
-      <div class="empty-state">No trail guides yet — check back soon.</div>
-    ) : (
-      <div class="trail-grid">
-        {trails.map(trail => {
-          const mainRoute = trail.data.routes[0];
-          const color = difficultyColor[trail.data.difficulty];
-          return (
-            <a href={`/trails/${trail.id}`} class="trail-card">
-              <div class="trail-card-img">
-                {trail.data.coverPhoto
-                  ? <img
-                      src={`${photosBase}/photos/${trail.data.coverPhoto}.webp`}
-                      alt={trail.data.coverImageAlt ?? trail.data.title}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  : <div class="no-photo">No photo yet</div>
-                }
-              </div>
-              <div class="trail-card-body">
-                <div>
-                  <div class="trail-card-location">{trail.data.location}</div>
-                  <div class="trail-card-title">{trail.data.title}</div>
-                </div>
-                <div class="trail-card-summary">{trail.data.summary}</div>
-                <div class="trail-card-meta">
-                  <span class="badge-difficulty" style={`color: ${color}; border-color: ${color}40;`}>
-                    {trail.data.difficulty}
-                  </span>
-                  {mainRoute && (
-                    <span class="trail-meta-stat">
-                      <span>{mainRoute.distance}</span>mi
-                    </span>
-                  )}
-                  {mainRoute && (
-                    <span class="trail-meta-stat">
-                      <span>+{mainRoute.elevationGain.toLocaleString()}</span>ft
-                    </span>
-                  )}
-                  <span class="scenic-stars" title={`Scenic rating: ${trail.data.scenicRating}/5`}>
-                    {stars(trail.data.scenicRating)}
-                  </span>
-                </div>
-              </div>
-            </a>
-          );
-        })}
-      </div>
-    )}
-  </body>
-</html>
+  )}
+</Base>
