@@ -556,13 +556,16 @@ const trailsSearchJson = JSON.stringify(
       if (!list) return;
 
       list.peaks.forEach(peak => {
-        const popup = new mapboxgl.Popup({ offset: 20, closeButton: true, maxWidth: '320px' })
+        const popup = new mapboxgl.Popup({ offset: 20, closeButton: false, maxWidth: '320px' })
           .setHTML(buildPopupHTML(peak));
 
         const marker = new mapboxgl.Marker({ color: markerColor(), scale: 0.8 })
           .setLngLat(peak.coords)
-          .setPopup(popup)
           .addTo(map);
+
+        const el = marker.getElement();
+        el.addEventListener('mouseenter', () => popup.setLngLat(peak.coords).addTo(map));
+        el.addEventListener('mouseleave', () => popup.remove());
 
         activeMarkers.push(marker);
       });
