@@ -8,12 +8,15 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev",
     "astro": "astro",
     "photo:add": "node scripts/add-photo.mjs",
-    "new-trail": "node scripts/new-trail.mjs"
+    "new-trail": "node scripts/new-trail.mjs",
+    "generate-types": "wrangler types",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.2.1",
     "@astrojs/mdx": "^5.0.4",
     "astro": "^6.1.9",
     "mapbox-gl": "^3.22.0",
@@ -24,5 +27,8 @@
     "@types/suncalc": "^1.9.2",
     "sharp": "^0.34.5",
     "wrangler": "^4.85.0"
+  },
+  "overrides": {
+    "vite": "^7"
   }
 }
