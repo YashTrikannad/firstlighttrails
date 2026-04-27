@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const trails = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/trails' }),
+  loader: glob({ pattern: ['**/*.{md,mdx}', '!**/_*.{md,mdx}'], base: './src/content/trails' }),
   schema: z.object({
     title: z.string(),
     location: z.string(),
@@ -14,9 +14,11 @@ const trails = defineCollection({
       distance: z.number(),       // miles (round trip)
       elevationGain: z.number(),  // feet
       type: z.enum(['loop', 'out-and-back', 'point-to-point']),
+      track: z.string().optional(),
     })),
     bestSeason: z.array(z.string()),
     hikingLists: z.array(z.string()).optional(),
+    peakCoords: z.tuple([z.number(), z.number()]).optional(), // [lng, lat] — unlocks sunrise/sunset section
     coverPhoto: z.string().optional(),      // base name, e.g. "imp-face-cover"
     coverImageAlt: z.string().optional(),
   }),

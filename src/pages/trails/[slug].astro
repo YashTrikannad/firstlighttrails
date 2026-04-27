@@ -2,6 +2,8 @@
 import Base from '../../layouts/Base.astro';
 import Nav from '../../components/Nav.astro';
 import { getCollection, render } from 'astro:content';
+import { HIKING_LISTS } from '../../data/hikingLists';
+import tzlookup from 'tz-lookup';
 
 export async function getStaticPaths() {
   const trails = await getCollection('trails');
@@ -13,6 +15,16 @@ export async function getStaticPaths() {
 
 const { trail } = Astro.props;
 const { Content } = await render(trail);
+
+const mapboxToken = import.meta.env.PUBLIC_MAPBOX_TOKEN;
+
+// Use coords from the MDX frontmatter if set; otherwise fall back to hikingLists lookup
+const peakCoords: [number, number] | null =
+  trail.data.peakCoords ??
+  HIKING_LISTS.flatMap(list => list.peaks).find(p => p.trailSlug === trail.id)?.coords ??
+  null;
+
+const peakTz = peakCoords ? tzlookup(peakCoords[1], peakCoords[0]) : null;
 
 const photosBase = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
 
@@ -29,6 +41,8 @@ function stars(n: number) {
 
 <Base title={`${trail.data.title} — First Light Trails`}>
   <Fragment slot="head">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.css" rel="stylesheet" />
+    <script is:inline src="https://api.mapbox.com/mapbox-gl-js/v3.11.0/mapbox-gl.js"></script>
     <style>
       /* ── Hero ── */
       .hero {
@@ -251,6 +265,69 @@ function stars(n: number) {
       .trail-body :global(p) { margin-bottom: 1.25rem; }
       .trail-body :global(p:last-child) { margin-bottom: 0; }
 
+      /* ── Sun & Light ── */
+      .sun-section {
+        padding: 2rem 3rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sun-section__date {
+        font-family: system-ui, sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: none;
+        color: var(--text-muted);
+        margin-left: 0.5rem;
+      }
+
+      .sun-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .sun-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.85rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .sun-card__label {
+        font-family: system-ui, sans-serif;
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--label);
+      }
+
+      .sun-card__value {
+        font-family: system-ui, sans-serif;
+        font-size: 0.95rem;
+        letter-spacing: 0.04em;
+        color: var(--text-body);
+      }
+
+      /* ── Route map panel ── */
+      .route-card { cursor: default; }
+      .route-card.has-track { cursor: pointer; }
+      .route-card.has-track:hover { border-color: var(--accent); }
+      .route-card.active { border-color: var(--accent); background: var(--bg-elevated); }
+
+      .track-map-panel {
+        display: none;
+        height: 340px;
+        margin-top: 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .track-map-panel.visible { display: block; }
+      #track-map { width: 100%; height: 100%; }
+
       /* ── Back link ── */
       .back-link {
         padding: 0 2rem 3rem;
@@ -323,12 +400,42 @@ function stars(n: number) {
     )}
   </div>
 
+  {peakCoords && (
+    <div class="sun-section" data-lng={peakCoords[0]} data-lat={peakCoords[1]} data-tz={peakTz}>
+      <div class="section-heading">
+        Sun &amp; Light <span class="sun-section__date" data-sun="date"></span>
+      </div>
+      <div class="sun-grid">
+        <div class="sun-card">
+          <span class="sun-card__label">Sunrise</span>
+          <span class="sun-card__value" data-sun="sunrise">—</span>
+        </div>
+        <div class="sun-card">
+          <span class="sun-card__label">Golden Hour AM</span>
+          <span class="sun-card__value" data-sun="goldenAM">—</span>
+        </div>
+        <div class="sun-card">
+          <span class="sun-card__label">Golden Hour PM</span>
+          <span class="sun-card__value" data-sun="goldenPM">—</span>
+        </div>
+        <div class="sun-card">
+          <span class="sun-card__label">Sunset</span>
+          <span class="sun-card__value" data-sun="sunset">—</span>
+        </div>
+        <div class="sun-card">
+          <span class="sun-card__label">Day Length</span>
+          <span class="sun-card__value" data-sun="daylength">—</span>
+        </div>
+      </div>
+    </div>
+  )}
+
   {trail.data.routes.length > 0 && (
     <div class="routes-section">
       <div class="section-heading">Route Options</div>
       <div class="routes-grid">
         {trail.data.routes.map(route => (
-          <div class="route-card">
+          <div class={`route-card${route.track ? ' has-track' : ''}`} data-track={route.track ?? ''}>
             <div class="route-name">{route.name}</div>
             <div class="route-stats">
               <div class="route-stat">
@@ -346,6 +453,10 @@ function stars(n: number) {
       </div>
     </div>
   )}
+
+  <div class="track-map-panel" id="track-map-panel">
+    <div id="track-map"></div>
+  </div>
 
   {trail.data.bestSeason.length > 0 && (
     <div class="season-section">
@@ -365,4 +476,126 @@ function stars(n: number) {
   <div class="back-link">
     <a href="/trails">← All Trails</a>
   </div>
+
+  <script define:vars={{ mapboxToken }}>
+    const panel = document.getElementById('track-map-panel');
+    const cards  = document.querySelectorAll('.route-card.has-track');
+    if (!cards.length) return;
+
+    mapboxgl.accessToken = mapboxToken;
+    let map = null;
+    let activeCard = null;
+
+    function initMap() {
+      if (map) return;
+      map = new mapboxgl.Map({
+        container: 'track-map',
+        style: 'mapbox://styles/mapbox/outdoors-v12',
+        center: [-71.2, 44.32],
+        zoom: 12,
+      });
+      map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+    }
+
+    function loadTrack(trackName) {
+      fetch(`/tracks/${trackName}.geojson`)
+        .then(r => r.json())
+        .then(geojson => {
+          if (map.getSource('track')) {
+            map.getSource('track').setData(geojson);
+          } else {
+            map.addSource('track', { type: 'geojson', data: geojson });
+            map.addLayer({
+              id: 'track-line',
+              type: 'line',
+              source: 'track',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': '#3b82f6', 'line-width': 3, 'line-opacity': 0.9 },
+            });
+          }
+
+          // Fit map to track bounds
+          const coords = geojson.features.flatMap(f =>
+            f.geometry.type === 'MultiLineString'
+              ? f.geometry.coordinates.flat()
+              : f.geometry.coordinates
+          );
+          if (coords.length) {
+            const bounds = coords.reduce(
+              (b, c) => b.extend(c),
+              new mapboxgl.LngLatBounds(coords[0], coords[0])
+            );
+            map.fitBounds(bounds, { padding: 40, duration: 800 });
+          }
+        });
+    }
+
+    function activateCard(card) {
+      const trackName = card.dataset.track;
+      if (!trackName) return;
+      cards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      activeCard = card;
+      panel.classList.add('visible');
+      if (!map) {
+        initMap();
+        map.on('load', () => loadTrack(trackName));
+      } else {
+        loadTrack(trackName);
+      }
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        if (activeCard === card) {
+          card.classList.remove('active');
+          panel.classList.remove('visible');
+          activeCard = null;
+        } else {
+          activateCard(card);
+        }
+      });
+    });
+
+    // Auto-show the first route that has a track
+    activateCard(cards[0]);
+  </script>
+
+  <script>
+    import SunCalc from 'suncalc';
+
+    const section = document.querySelector<HTMLElement>('.sun-section');
+    if (section) {
+      const lng = parseFloat(section.dataset.lng!);
+      const lat = parseFloat(section.dataset.lat!);
+      const tz  = section.dataset.tz!;
+      const now = new Date();
+      const t = SunCalc.getTimes(now, lat, lng);
+
+      const fmtTime = (d: Date) =>
+        new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric', minute: '2-digit', timeZone: tz,
+        }).format(d);
+      const fmtDate = (d: Date) =>
+        new Intl.DateTimeFormat('en-US', {
+          month: 'short', day: 'numeric', timeZone: tz,
+        }).format(d);
+
+      const set = (key: string, value: string) => {
+        const el = section.querySelector(`[data-sun="${key}"]`);
+        if (el) el.textContent = value;
+      };
+
+      set('date', `· today, ${fmtDate(now)}`);
+      set('sunrise',  fmtTime(t.sunrise));
+      set('sunset',   fmtTime(t.sunset));
+      set('goldenAM', `${fmtTime(t.sunrise)} – ${fmtTime(t.goldenHourEnd)}`);
+      set('goldenPM', `${fmtTime(t.goldenHour)} – ${fmtTime(t.sunset)}`);
+
+      const ms = t.sunset.getTime() - t.sunrise.getTime();
+      const h = Math.floor(ms / 3_600_000);
+      const m = Math.floor((ms % 3_600_000) / 60_000);
+      set('daylength', `${h}h ${m}m`);
+    }
+  </script>
 </Base>

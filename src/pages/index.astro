@@ -15,6 +15,7 @@ const trailInfo = Object.fromEntries(
     coverPhoto:   t.data.coverPhoto ?? null,
     scenicRating: t.data.scenicRating,
     difficulty:   t.data.difficulty,
+    firstTrack:   t.data.routes.find(r => r.track)?.track ?? null,
   }])
 );
 
@@ -28,6 +29,7 @@ const enrichedLists = HIKING_LISTS.map(list => ({
       coverPhoto:   trailInfo[peak.trailSlug]?.coverPhoto   ?? null,
       scenicRating: trailInfo[peak.trailSlug]?.scenicRating ?? null,
       difficulty:   trailInfo[peak.trailSlug]?.difficulty   ?? null,
+      firstTrack:   trailInfo[peak.trailSlug]?.firstTrack   ?? null,
     } : null,
   })),
 }));
@@ -507,6 +509,34 @@ const trailsSearchJson = JSON.stringify(
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? '#4a8a3e' : '#1e4a1a';
     }
 
+    const TRACK_SOURCE = 'hover-track';
+    const TRACK_LAYER  = 'hover-track-line';
+
+    function showTrack(trackName) {
+      fetch(`/tracks/${trackName}.geojson`)
+        .then(r => r.json())
+        .then(geojson => {
+          if (map.getSource(TRACK_SOURCE)) {
+            map.getSource(TRACK_SOURCE).setData(geojson);
+          } else {
+            map.addSource(TRACK_SOURCE, { type: 'geojson', data: geojson });
+            map.addLayer({
+              id: TRACK_LAYER,
+              type: 'line',
+              source: TRACK_SOURCE,
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': '#3b82f6', 'line-width': 3, 'line-opacity': 0.9 },
+            });
+          }
+        });
+    }
+
+    function clearTrack() {
+      if (map.getSource(TRACK_SOURCE)) {
+        map.getSource(TRACK_SOURCE).setData({ type: 'FeatureCollection', features: [] });
+      }
+    }
+
     function buildPopupHTML(peak) {
       if (peak.trail) {
         const imgHTML = peak.trail.coverPhoto
@@ -563,9 +593,28 @@ const trailsSearchJson = JSON.stringify(
           .setLngLat(peak.coords)
           .addTo(map);
 
+        let hideTimer = null;
+
+        function scheduleHide() {
+          hideTimer = setTimeout(() => { popup.remove(); clearTrack(); }, 200);
+        }
+        function cancelHide() {
+          clearTimeout(hideTimer);
+        }
+
         const el = marker.getElement();
-        el.addEventListener('mouseenter', () => popup.setLngLat(peak.coords).addTo(map));
-        el.addEventListener('mouseleave', () => popup.remove());
+        el.addEventListener('mouseenter', () => {
+          cancelHide();
+          popup.setLngLat(peak.coords).addTo(map);
+          if (peak.trail?.firstTrack) showTrack(peak.trail.firstTrack);
+        });
+        el.addEventListener('mouseleave', scheduleHide);
+
+        popup.on('open', () => {
+          const popupEl = popup.getElement();
+          popupEl.addEventListener('mouseenter', cancelHide);
+          popupEl.addEventListener('mouseleave', scheduleHide);
+        });
 
         activeMarkers.push(marker);
       });

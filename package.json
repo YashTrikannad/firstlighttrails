@@ -10,14 +10,18 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "photo:add": "node scripts/add-photo.mjs"
+    "photo:add": "node scripts/add-photo.mjs",
+    "new-trail": "node scripts/new-trail.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",
     "astro": "^6.1.9",
-    "mapbox-gl": "^3.22.0"
+    "mapbox-gl": "^3.22.0",
+    "suncalc": "^1.9.0",
+    "tz-lookup": "^6.1.25"
   },
   "devDependencies": {
+    "@types/suncalc": "^1.9.2",
     "sharp": "^0.34.5",
     "wrangler": "^4.85.0"
   }

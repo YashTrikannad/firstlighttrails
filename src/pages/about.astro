@@ -1,0 +1,354 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+
+const photosBase = (import.meta.env.PUBLIC_PHOTOS_BASE ?? '').replace(/\/$/, '');
+
+const heroPhoto = { file: 'imp-face-pano-1', alt: 'Presidential Range from Imp Face at sunrise' };
+
+const galleryPhotos: { file: string; alt: string }[] = [
+  { file: 'imp-face-pano-5',  alt: 'Open ledges on the Imp Trail' },
+  { file: 'imp-face-pano-13', alt: 'Carter-Moriah Range ridge' },
+];
+---
+
+<Base title="About — First Light Trails">
+  <Fragment slot="head">
+    <style>
+      /* ── Hero ── */
+      .hero {
+        position: relative;
+        height: 70vh;
+        min-height: 420px;
+        overflow: hidden;
+      }
+
+      .hero-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 35%;
+        display: block;
+      }
+
+      .hero-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--bg-elevated);
+      }
+
+      .hero-gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(0,0,0,0.08) 0%,
+          rgba(0,0,0,0.0) 30%,
+          rgba(0,0,0,0.72) 100%
+        );
+      }
+
+      .hero-text {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 3rem;
+      }
+
+      .hero-location {
+        font-family: system-ui, sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.65);
+        margin-bottom: 0.6rem;
+      }
+
+      .hero-name {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        font-weight: normal;
+        color: #ffffff;
+        line-height: 1;
+        letter-spacing: 0.01em;
+        margin-bottom: 0.9rem;
+      }
+
+      .hero-ig {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        transition: color 0.2s;
+      }
+
+      .hero-ig:hover { color: #fff; }
+
+      .ig-dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+      }
+
+      /* ── Intro ── */
+      .about-intro {
+        padding: 4rem 3rem;
+        max-width: 820px;
+        margin: 0 auto;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .about-intro p {
+        font-size: 1.3rem;
+        line-height: 1.65;
+        color: var(--text);
+        max-width: 54ch;
+      }
+
+      /* ── Gallery strip ── */
+      .gallery-strip {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .gallery-strip-item {
+        flex: 1;
+        height: 300px;
+        overflow: hidden;
+        border-right: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+
+      .gallery-strip-item:last-child { border-right: none; }
+
+      .gallery-strip-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        opacity: 0.88;
+        transition: opacity 0.35s, transform 0.45s;
+      }
+
+      .gallery-strip-item:hover img {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+
+      /* ── Body content ── */
+      .about-body {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 5rem 3rem;
+      }
+
+      .prose {
+        font-size: 1.05rem;
+        line-height: 1.85;
+        color: var(--text-body);
+      }
+
+      .prose p {
+        max-width: 66ch;
+        margin-bottom: 1.5rem;
+      }
+
+      .prose p:last-child { margin-bottom: 0; }
+
+      .body-section {
+        padding-top: 3.5rem;
+        margin-top: 3.5rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .section-label {
+        font-family: system-ui, sans-serif;
+        font-size: 0.62rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--label);
+        margin-bottom: 1.5rem;
+      }
+
+      /* ── Gear ── */
+      .gear-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .gear-list li {
+        display: flex;
+        align-items: baseline;
+        gap: 1.5rem;
+        font-family: system-ui, sans-serif;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .gear-list li:first-child { border-top: 1px solid var(--border); }
+
+      .gear-name {
+        font-size: 0.88rem;
+        color: var(--text);
+        min-width: 11rem;
+        flex-shrink: 0;
+      }
+
+      .gear-note {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+
+      /* ── Footer link ── */
+      .ig-footer {
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .ig-footer p {
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        max-width: 36ch;
+      }
+
+      .ig-footer-link {
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+        text-decoration: none;
+        border: 1px solid var(--border);
+        padding: 0.6rem 1.25rem;
+        border-radius: 2px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: border-color 0.2s;
+      }
+
+      .ig-footer-link:hover { border-color: var(--accent); }
+
+      /* ── Mobile ── */
+      @media (max-width: 640px) {
+        .hero-text { padding: 2rem 1.5rem; }
+        .about-intro { padding: 3rem 1.5rem; }
+        .about-body { padding: 3rem 1.5rem; }
+        .gallery-strip { flex-direction: column; }
+        .gallery-strip-item {
+          height: 220px;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+        .gallery-strip-item:last-child { border-bottom: none; }
+        .ig-footer { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </Fragment>
+
+  <Nav active="about" />
+
+  <div class="hero">
+    {photosBase
+      ? <img class="hero-img" src={`${photosBase}/photos/${heroPhoto.file}.webp`} alt={heroPhoto.alt} loading="eager" />
+      : <div class="hero-placeholder"></div>
+    }
+    <div class="hero-gradient"></div>
+    <div class="hero-text">
+      <div class="hero-location">Boston, New England</div>
+      <h1 class="hero-name">Yash Trikannad</h1>
+      <a class="hero-ig" href="https://instagram.com/yash.t.photography" target="_blank" rel="noopener">
+        <span class="ig-dot"></span>
+        @yash.t.photography
+      </a>
+    </div>
+  </div>
+
+  <div class="about-intro">
+    <p>
+      I moved to Boston in the fall of 2024 with fifteen years of hiking behind me and almost no idea what the White Mountains were. I've been making up for lost time ever since.
+    </p>
+  </div>
+
+  {galleryPhotos.length > 0 && photosBase && (
+    <div class="gallery-strip">
+      {galleryPhotos.map(p => (
+        <div class="gallery-strip-item">
+          <img src={`${photosBase}/photos/${p.file}.webp`} alt={p.alt} loading="lazy" />
+        </div>
+      ))}
+    </div>
+  )}
+
+  <div class="about-body">
+
+    <div class="prose">
+      <p>
+        Those fifteen years took me through the Sierras (long dusty approaches, granite everything, the particular silence of being above 12,000 feet) and a few times to the Himalayas, where the scale is so wrong it takes a day or two for your brain to catch up. I've stood on volcanic summits in Java and Malaysia before sunrise, watched the desert light of the Southwest turn canyon walls colors that don't feel real, and spent time in the Adirondacks learning that northeast forests have their own kind of quiet.
+      </p>
+      <p>
+        New England is smaller than most of those places by every measure. But there's something about the density of it. A two-hour drive from the city and you're on a ridge above the clouds.
+      </p>
+      <p>
+        I started shooting seriously around the same time I started hiking, and the two have been tangled together ever since. The reason I go out at 3am, the reason I'll hike the same trail three times in different seasons: it's almost always about the light.
+      </p>
+    </div>
+
+    <div class="body-section">
+      <div class="section-label">Why this site</div>
+      <div class="prose">
+        <p>
+          When I got to New England I went looking for the kind of hiking guide I actually wanted to read. One that told me not just the distance and elevation gain, but where exactly to stand, which direction the light would come from, what the ledges look like thirty minutes before sunrise. That information almost never gets written down.
+        </p>
+        <p>
+          So I started writing it down myself. These guides are what I wish had existed when I arrived. They're written for people who care about the photograph as much as the hike, or more. If you're trying to plan a sunrise shot on a specific ridge and want to know whether it's worth the 3am drive, I'm trying to answer that question.
+        </p>
+      </div>
+    </div>
+
+    <div class="body-section">
+      <div class="section-label">Gear</div>
+      <ul class="gear-list">
+        <li>
+          <span class="gear-name">OM System OM-5</span>
+          <span class="gear-note">weather-sealed, light enough to not hate yourself on mile 8</span>
+        </li>
+        <li>
+          <span class="gear-name">12–100mm f/4</span>
+          <span class="gear-note">stays on the camera for most hikes</span>
+        </li>
+        <li>
+          <span class="gear-name">8–25mm f/4</span>
+          <span class="gear-note">wide landscapes and tight ridgeline compositions</span>
+        </li>
+        <li>
+          <span class="gear-name">40–150mm f/4</span>
+          <span class="gear-note">wildlife, distant peaks, compression</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="ig-footer">
+      <p>More work on Instagram, updated regularly.</p>
+      <a class="ig-footer-link" href="https://instagram.com/yash.t.photography" target="_blank" rel="noopener">
+        @yash.t.photography →
+      </a>
+    </div>
+
+  </div>
+
+</Base>

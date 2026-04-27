@@ -1,0 +1,80 @@
+---
+# ── Required fields ────────────────────────────────────────────────────────────
+
+title: "Trail Name"
+# The name shown on trail cards and the guide page header
+
+location: "Range, State"
+# e.g. "Carter-Moriah Range, White Mountains, NH"
+
+summary: "One-sentence description shown on trail cards and the index page"
+
+difficulty: "moderate"
+# Options: easy | moderate | hard | strenuous
+
+scenicRating: 4
+# 1–5 stars shown on the trail card
+
+routes:
+  - name: "Route Name (e.g. Northern Approach)"
+    distance: 5.2          # miles, round trip
+    elevationGain: 1800    # feet
+    type: "out-and-back"   # loop | out-and-back | point-to-point
+    track: "trail-name-route"
+    # Optional: filename (no extension) of the GeoJSON track in public/tracks/
+    # Remove this line if you don't have a track file yet
+
+bestSeason: ["June", "July", "August", "September", "October"]
+# Months when the trail is typically accessible and worthwhile
+
+# ── Optional fields ─────────────────────────────────────────────────────────────
+
+hikingLists: ["52wav"]
+# Remove this line if the peak isn't on a hiking list
+# Currently supported: "52wav" (NH 52 With a View)
+
+peakCoords: [-71.188150, 44.321627]
+# [longitude, latitude] of the summit — enables the Sunrise & Light section
+# Get these from Google Maps (right-click → copy coordinates) or AllTrails
+# Note: longitude is the FIRST number (negative for NH), latitude is SECOND
+
+coverPhoto: "trail-name-cover"
+# Base filename (no extension) of the hero photo, stored in R2 at /photos/<name>.webp
+
+coverImageAlt: "Description of the cover photo for screen readers"
+---
+
+import TrailPhoto from '../../components/TrailPhoto.astro';
+import PhotoSpot from '../../components/PhotoSpot.astro';
+
+Opening paragraph. Set the scene — what kind of hike is this, what makes it worth doing? 2–3 sentences.
+
+## The Approach
+
+Describe the trailhead and the hike in. What does the terrain look and feel like? When does it open up?
+
+<TrailPhoto
+  photo="trail-name-1"
+  caption="Caption for this photo"
+/>
+
+## The Summit / Key Viewpoint
+
+What do you actually see from the top? Describe the view, the character of the summit, what makes it special.
+
+<TrailPhoto
+  photo="trail-name-2"
+  caption="Caption for this photo"
+  wide={true}
+/>
+
+<PhotoSpot
+  name="Name of the specific shooting location"
+  facing="west"
+  bestTime="At sunrise, mid-October"
+  notes="Detailed notes for photographers: where to stand, what the light does, what to watch out for, suggested compositions."
+/>
+
+## Conditions & Notes
+
+When to go, what to watch out for, parking, anything seasonal.
